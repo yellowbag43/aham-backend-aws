@@ -85,7 +85,7 @@ router.put(`/change`, async (req, res) => {
     let login = req.body.login.toLowerCase();
 
     try{
-        connection.query('SELECT otp, otpvalidity FROM users WHERE login = ?',[login], (err, rows) => {
+        connection.query('SELECT otp, otpvalidity, email FROM users WHERE login = ?',[login], (err, rows) => {
             if (!err) {
                 if ( rows.length <= 0 )
                     return res.status(400).send( {status : 'UNKNOWN Login' })
