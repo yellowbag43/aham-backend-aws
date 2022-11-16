@@ -131,7 +131,7 @@ router.get(`/getcategory`, async (req, res) => {
                                                   message: "no Employees added yet!"})}
         } 
         else {
-            return res.status(400).send( {  success: false, message:'Failed to fetch employees!'} );
+            return res.status(200).send( {  status: false, message:'Failed to fetch employee type!'} );
         }});
 })
 
