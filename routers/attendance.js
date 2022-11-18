@@ -4,6 +4,7 @@ const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const e = require('express');
+const SqlString = require('sqlstring');
 
 require('dotenv/config')
 
@@ -15,7 +16,6 @@ let connection = mysql.createConnection( {
     password: process.env.DB_PASS,
     database: process.env.DB_NAME
 });
-
 
 router.post(`/add`, async  (req,res) => {
     //     const BearerToken= req.headers.authorization.split(" ")
@@ -41,7 +41,7 @@ router.post(`/add`, async  (req,res) => {
             }
         })
     })
-    return res.status(200).send( { status: message} )
+    return res.status(200).send( { status: true, message: "attendance logged!"} )
 })
     
 router.post(`/addtype`, async  (req,res) => {
@@ -80,7 +80,7 @@ router.get(`/:date`, async (req, res) => {
     //     }
    if (req.params.date === "type" )
     {
-        connection.query('SELECT * FROM attendancetype', (err, rows) => {
+        connection.query('SELECT *, ID as aid, type as atype, description FROM attendancetype', (err, rows) => {
             if (!err) {
                 if ( rows.length>0 )
                 { return res.status(200).send( { status: true,
@@ -112,9 +112,15 @@ router.get(`/:date`, async (req, res) => {
         // jwtvalues = jwt.verify(token, secret);
         // if ( jwtvalues.type!=100) 
         //      return res.status(400).send( {status : "Access denied!"})    
-                    
-        let sql = "UPDATE attendancetype SET description='"+req.body.description+ "',name ='"+req.body.name+"' WHERE ID="+req.body.ID;
-    
+        req.body.description = req.body.description.replace(/'/g, "\\'");
+
+        let sql = "UPDATE attendancetype SET type = '"+req.body.type+
+                                    "', description = '"+ req.body.description +
+                                    "' WHERE ID = "+ req.body.ID;
+//                             [req.body.description, req.body.type, req.body.ID]
+  //                                              " WHERE ID = ?"+req.body.ID;
+
+
         connection.query(sql, req.body, (err, results) => {
             if ( err ){
                 console.log(err);
@@ -145,10 +151,10 @@ router.delete(`/deletetype/:id`, async  (req,res) => {
     let query = connection.query(sql,(err, results) => {
         if (!err)
         {
-            return res.status(200).send( {status : results })
+            return res.status(200).send( {status : true, message : "Attendance Deleted!" })
         }
         else
-            return res.status(400).send( { status : err.sqlMessage })
+            return res.status(200).send( { status : false, message: err.sqlMessage })
     })
 })
 

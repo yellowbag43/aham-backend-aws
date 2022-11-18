@@ -52,7 +52,7 @@ router.post(`/add`, async  (req,res) => {
     })
 })
 
-router.get(`/get`, async (req, res) => {
+router.get(`/all`, async (req, res) => {
 //    if( await !check_permission(req.headers.authorization) )
   //      return res.status(400).send( {status : "Access denied!"})
 
@@ -73,7 +73,7 @@ router.get(`/get`, async (req, res) => {
     }});
 })
 
-router.get(`/getid/:id`, async (req, res) => {
+router.get(`/get/:id`, async (req, res) => {
     //    if( await !check_permission(req.headers.authorization) )
       //      return res.status(400).send( {status : "Access denied!"})
     

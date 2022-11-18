@@ -80,21 +80,29 @@ router.post(`/login`, async (req, res) => {
 
 
 router.put(`/amend`, async (req, res) => {
-    let userID = req.body.login.toLowerCase();
-
-    connection.query('SELECT login,user_type,mobile,email,state FROM users WHERE login = ?',[userID], (err, rows) => {
+    console.log("BODY "+req.body.state)
+    connection.query('SELECT user_type,email,mobile,address,area,state,zip FROM users WHERE ID = ?',[req.body.ID], (err, rows) => {
         if (!err) {
             if ( rows.length>0){
                        
                 const data = {
                     user_type : (req.body.user_type) ? req.body.user_type : rows[0].user_type,
-                    mobile    : (req.body.mobile)    ? req.body.mobile: rows[0].mobile,
                     email     : (req.body.email)    ? req.body.email: rows[0].email,
-                    state     : (req.body.state)    ? req.body.email: rows[0].state,
+                    mobile    : (req.body.mobile)    ? req.body.mobile: rows[0].mobile,
+                    address   : (req.body.address)  ? req.body.address: rows[0].address,
+                    area      : (req.body.area)     ? req.body.area: rows[0].area,
+                    state     : (req.body.state)    ? req.body.state: rows[0].state,
+                    zip       : (req.body.zip)    ? req.body.zip: rows[0].zip
                 }
                 
-//                let sql = "UPDATE users SET user_type="+data.user_type+", mobile="+data.mobile+" email="+data.email+" state="+data.state+" WHERE login="+req.body.login;
-                let sql = "UPDATE users SET user_type="+data.user_type+", email='"+ data.email+ "',mobile='"+data.mobile+"' WHERE login='"+req.body.login +"'";
+                let sql = "UPDATE users SET user_type="+data.user_type+",\
+                                            email='"+ data.email+ "',\
+                                            mobile='"+data.mobile+"',\
+                                            address='"+data.address+"',\
+                                            area='"+data.area+"',\
+                                            state='"+data.state+"',\
+                                            zip='"+data.zip+"'\
+                                            WHERE ID="+req.body.ID ;
 
                 connection.query(sql, data, (err, results) => {
                     if ( err ){
@@ -104,8 +112,7 @@ router.put(`/amend`, async (req, res) => {
                     }
                     else
                     {
-                        return res.status(200).send({status: 'User proflie updated Successfully!',
-                        message: results})    
+                        return res.status(200).send({status: true, message : 'User proflie updated Successfully!'})    
                     } 
                 })
             }
@@ -121,7 +128,7 @@ router.put(`/amend`, async (req, res) => {
 })
 
 
-router.get(`/get`, async (req, res) => {
+router.get(`/all`, async (req, res) => {
 //    const BearerToken= req.headers.authorization.split(" ")
   //  const token=BearerToken[1];
 //    console.log(token)
@@ -144,6 +151,29 @@ router.get(`/get`, async (req, res) => {
         }});
 })
 
+router.get(`/get/:id`, async (req, res) => {
+    //    const BearerToken= req.headers.authorization.split(" ")
+      //  const token=BearerToken[1];
+    //    console.log(token)
+      //  jwtvalues = jwt.verify(token, secret);
+    
+      //  if ( jwtvalues.type != 100) { //Admin user only register users
+       //     return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
+       // }
+    
+        connection.query('SELECT b.*, a.category FROM users as b INNER JOIN usercategory as a ON (b.user_type = a.ID) WHERE b.ID='+req.params.id, (err, rows) => {
+            if (!err) {
+                if ( rows.length>0 )
+                { return res.status(200).send( { status: true,
+                                                 user: rows[0]})}
+                else { return res.status(200).send( { status: false,
+                                                      message: "no Users added yet!"})}
+            } 
+            else {
+                return res.status(400).send( {  success: false, message:'Failed to fetch users!'} );
+            }});
+    })
+    
 
 router.get(`/getcategory`, async (req, res) => {
     connection.query('SELECT * FROM usercategory', (err, rows) => {

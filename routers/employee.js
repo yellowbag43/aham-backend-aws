@@ -45,25 +45,36 @@ router.post(`/add`, async  (req,res) => {
 
 router.put(`/amend`, async (req, res) => {
     let employeeID = req.body.ID;
+    console.log("email "+req.body.email)
 
     connection.query('SELECT * FROM employees WHERE ID = ?',[employeeID], (err, rows) => {
         if (!err) {
             if ( rows.length>0){
                        
                 const data = {
-                    type    : (req.body.type)      ? req.body.type    : rows[0].type,
+                    name    : (req.body.name)      ? req.body.name    : rows[0].name,
+                    gender  : (req.body.gender)    ? req.body.gender  : rows[0].gender,
                     dob     : (req.body.dob)       ? req.body.dob     : rows[0].dob,
+                    type    : (req.body.type)      ? req.body.type    : rows[0].type,
                     mobile  : (req.body.mobile)    ? req.body.mobile  : rows[0].mobile,
-                    address : (req.body.email)     ? req.body.address : rows[0].address,
+                    email   : (req.body.email)     ? req.body.email   : rows[0].email,
+                    address : (req.body.address)   ? req.body.address : rows[0].address,
                     area    : (req.body.state)     ? req.body.area    : rows[0].area,
                     state   : (req.body.state)     ? req.body.state   : rows[0].state,
+                    zip     : (req.body.zip)       ? req.body.zip     : rows[0].zip,
                 }
                 
                 let sql = "UPDATE employees SET type="+data.type+",\
-                                                dob='"+data.dob+"', \
+                                                name='"+data.name+"', \
+                                                gender="+ data.gender+ ",\
+                                                dob='"+ data.dob+ "',\
                                                 mobile='"+ data.mobile+ "',\
-                                                address='"+data.address+"' \
-                                                WHERE ID='"+employeeID +"'";
+                                                email='"+ data.email+ "',\
+                                                address='"+data.address+"', \
+                                                area='"+data.area+"', \
+                                                state='"+data.state+"', \
+                                                zip='"+data.zip+"' \
+                                                WHERE ID="+employeeID;
 
                 connection.query(sql, data, (err, results) => {
                     if ( err ){
@@ -90,7 +101,7 @@ router.put(`/amend`, async (req, res) => {
 })
 
 
-router.get(`/get`, async (req, res) => {
+router.get(`/all`, async (req, res) => {
 //    const BearerToken= req.headers.authorization.split(" ")
 //    const token=BearerToken[1];
 //    console.log(token)
@@ -99,8 +110,7 @@ router.get(`/get`, async (req, res) => {
   //  if ( jwtvalues.type != 100) { //Admin user only register users
    //     return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
    // }
-
-    connection.query('select b.*, a.category FROM employees as b INNER JOIN employeecategory as a ON (b.type = a.ID);', (err, rows) => {
+    connection.query('select b.*, a.type as typestr FROM employees as b INNER JOIN employeecategory as a ON (b.type = a.ID)', (err, rows) => {
         if (!err) {
             if ( rows.length>0 )
             { return res.status(200).send( { status: true,
@@ -109,10 +119,32 @@ router.get(`/get`, async (req, res) => {
                                                   message: "no Employees added yet!"})}
         } 
         else {
-            return res.status(400).send( {  success: false, message:'Failed to fetch employees!'} );
+            return res.status(400).send( {  success: false, message:err.sqlMessage} );
         }});
 })
 
+router.get(`/get/:id`, async (req, res) => {
+    //    const BearerToken= req.headers.authorization.split(" ")
+    //    const token=BearerToken[1];
+    //    console.log(token)
+     //   jwtvalues = jwt.verify(token, secret);
+    
+      //  if ( jwtvalues.type != 100) { //Admin user only register users
+       //     return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
+       // }
+         connection.query('select b.*, a.type FROM employees as b INNER JOIN employeecategory as a ON (b.type = a.ID) WHERE b.ID='+req.params.id, (err, rows) => {
+            if (!err) {
+                if ( rows.length>0 )
+                { return res.status(200).send( { status: true,
+                                                 employee: rows[0]})}
+                else { return res.status(200).send( { status: true,
+                                                      message: "Employees Not found for this ID "+req.params.id})}
+            } 
+            else {
+                return res.status(200).send( {  success: false, message:err.sqlMessage} );
+            }});
+    })
+    
 router.get(`/getcategory`, async (req, res) => {
     // const BearerToken= req.headers.authorization.split(" ")
     // const token=BearerToken[1];
@@ -126,12 +158,12 @@ router.get(`/getcategory`, async (req, res) => {
         if (!err) {
             if ( rows.length>0 )
             { return res.status(200).send( { status: true,
-                                             employees: rows})}
+                                             employeecategories: rows})}
             else { return res.status(200).send( { status: true,
                                                   message: "no Employees added yet!"})}
         } 
         else {
-            return res.status(200).send( {  status: false, message:'Failed to fetch employee type!'} );
+            return res.status(200).send( {  status: false, message:'Failed to fetch employee!'} );
         }});
 })
 
