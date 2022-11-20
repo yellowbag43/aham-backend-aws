@@ -133,7 +133,25 @@ router.get(`/:date`, async (req, res) => {
         })
     })
     
+//    select a.*, b.type from attendance as a INNER JOIN attendancetype as b ON (a.status = b.ID) WHERE a.date>'2022-11-15' AND a.date <='2022-11-25' AND employee=20;
     
+router.post(`/query`, async (req, res) => {
+    console.log(req.body)
+        let sql = 'CALL attendance_query(?,?,?)';
+        
+        connection.query(sql,req.body.query, (err, rows) => {
+        if (!err) {
+            if ( rows.length>0 )
+            { 
+                return res.status(200).send( { status: true,
+                                                attendance: rows})}
+            else { return res.status(200).send( { status: true,
+                                                    message: "no Attendances added yet!"})}
+        } 
+        else {
+            return res.status(200).send( {  status: false, message:'Failed to fetch Attendance completed!'} );
+        }});    
+    })
 
 
 router.delete(`/deletetype/:id`, async  (req,res) => {

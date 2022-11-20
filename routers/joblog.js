@@ -26,18 +26,17 @@ router.post(`/add`, async  (req,res) => {
 //     if ( jwtvalues.type != 100) { //Admin user only register users
 //         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
 //     }
-
+    console.log("post add called : "+req.body.jobdate)
     let sql = "INSERT INTO joblog SET ?";
 
     let query = connection.query(sql, req.body, (err, results)=> {
         if ( !err )
         {
-            console.log(results)
-            return res.status(200).send( { status: 'success'} )
+            return res.status(200).send( { status: true, message: "Job log added"} )
         }
         else
         { console.log(err)
-            return res.status(200).send( { status: err.sqlMessage } );
+            return res.status(200).send( { status: false, message: err.sqlMessage } );
         }
     })
 })
@@ -90,8 +89,8 @@ router.put(`/amend`, async (req, res) => {
 })
 
 
-router.get(`/get`, async (req, res) => {
-//     const BearerToken= req.headers.authorization.split(" ")
+router.post(`/query`, async  (req,res) => {
+    //     const BearerToken= req.headers.authorization.split(" ")
 //     const token=BearerToken[1];
 // //    console.log(token)
 //     jwtvalues = jwt.verify(token, secret);
@@ -100,16 +99,20 @@ router.get(`/get`, async (req, res) => {
 //         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
 //     }
 
-    connection.query('SELECT * FROM joblog', (err, rows) => {
+    const sql=("CALL fetch_job_log (?)")
+
+
+    connection.query(sql, req.body.jobdate, (err, rows) => {
         if (!err) {
             if ( rows.length>0 )
-            { return res.status(200).send( { status: true,
-                                             joblog: rows})}
-            else { return res.status(200).send( { status: true,
+            { 
+                return res.status(200).send( { status: true,
+                                             joblog: rows[0]})}
+            else { return res.status(200).send( { status: false,
                                                   message: "no Joblog added yet!"})}
         } 
         else {
-            return res.status(400).send( {  success: false, message:'Failed to fetch jobs completed!'} );
+            return res.status(200).send( {  success: false, message:'Failed to fetch jobs completed!'} );
         }});
 })
 
