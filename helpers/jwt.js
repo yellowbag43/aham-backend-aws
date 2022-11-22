@@ -15,6 +15,7 @@ function authJwt() {
             { url: /\/mk-api\/v1\/employee(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
             { url: /\/mk-api\/v1\/password(.*)/, methods: ['GET', 'POST','PUT', 'DELETE', 'OPTIONS']},//working
             { url: /\/mk-api\/v1\/employee(.*)/, methods: ['GET',  'DELETE', 'OPTIONS']},//working
+            { url: /\/mk-api\/v1\/reports(.*)/, methods: ['GET', 'POST', 'DELETE', 'OPTIONS']},//working
         ]                                                               //regex101.com
     })
 }

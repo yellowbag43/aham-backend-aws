@@ -35,7 +35,7 @@ router.post(`/add`, async  (req,res) => {
             return res.status(200).send( { status: true, message: "Job log added"} )
         }
         else
-        { console.log(err)
+        { console.log(err.sqlMessage)
             return res.status(200).send( { status: false, message: err.sqlMessage } );
         }
     })

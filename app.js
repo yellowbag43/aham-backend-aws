@@ -27,6 +27,7 @@ const jobRouter = require('./routers/job')
 const employeeRouter = require('./routers/employee')
 const joblogRouter = require('./routers/joblog')
 const attendanceRouter = require('./routers/attendance')
+const excelRouter = require('./routers/reports')
 
 const app = express();
 const errorhandler = require('./helpers/error-handler')
@@ -47,6 +48,7 @@ app.use(`${api}/job`, jobRouter)
 app.use(`${api}/employee`, employeeRouter)
 app.use(`${api}/joblog`, joblogRouter)
 app.use(`${api}/attendance`, attendanceRouter)
+app.use(`${api}/reports`, excelRouter)
 
 app.get('/', (req, res)  => {
     res.send("hello mk api!");

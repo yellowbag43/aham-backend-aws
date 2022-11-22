@@ -22,6 +22,7 @@
     "nodemailer": "^6.8.0",
     "nodemailer-express-handlebars": "^5.0.0",
     "nodemon": "^2.0.20",
-    "sqlstring": "^2.3.3"
+    "sqlstring": "^2.3.3",
+    "write-excel-file": "^1.4.15"
   }
 }
