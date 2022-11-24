@@ -4,6 +4,7 @@ const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+
 require('dotenv/config')
 
 const secret = process.env.secret;
@@ -56,21 +57,20 @@ router.get(`/all`, async (req, res) => {
 //    if( await !check_permission(req.headers.authorization) )
   //      return res.status(400).send( {status : "Access denied!"})
 
-
-    connection.query('SELECT * FROM jobs', (err, rows) => {
-    if (!err) {
-        console.log("Rows returned :"+rows.length)
-        if ( rows.length>0 )
-        {   console.log("returning rows")
-            return res.status(200).send( { status: true,
-                                            jobs: rows})
+    connection.query('SELECT * FROM jobs', (err, rows) =>  { 
+        if ( !err )
+        {
+            if (rows.length>0)
+                return res.status(200).send( { status: true, jobs :rows} )
+            else
+                return res.status(200).send( { status: true, message: "No data found"} )
         }
-        else { return res.status(200).send( { status: false,
-                                                message: "no Jobs added yet!"})}
-    } 
-    else {
-        return res.status(400).send( {  success: false, message:'Failed to fetch jobs!'} );
-    }});
+        else
+        { console.log(err)
+            return res.status(200).send( { status: false, message: err.sqlMessage } );
+        }
+    })
+
 })
 
 router.get(`/get/:id`, async (req, res) => {
@@ -153,6 +153,5 @@ router.delete(`/:id`, async  (req,res) => {
             return res.status(200).send( { status : false, message: err.sqlMessage })
     })
 })
-
 
 module.exports = router;

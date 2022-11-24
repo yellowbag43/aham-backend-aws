@@ -3,6 +3,7 @@ console.log("mysqlAPI back-end");
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+require('./lib/stableConnect')
 require('dotenv/config');
 
 const api = process.env.API_URL;

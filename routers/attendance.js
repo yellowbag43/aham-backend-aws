@@ -80,7 +80,7 @@ router.get(`/:date`, async (req, res) => {
     //     }
    if (req.params.date === "type" )
     {
-        connection.query('SELECT *, ID as aid, type as atype, description FROM attendancetype', (err, rows) => {
+        connection.query('SELECT *, ID as aid, name as atype, description FROM attendancetype', (err, rows) => {
             if (!err) {
                 if ( rows.length>0 )
                 { return res.status(200).send( { status: true,

@@ -57,11 +57,20 @@ router.put(`/amend`, async (req, res) => {
                     dob     : (req.body.dob)       ? req.body.dob     : rows[0].dob,
                     type    : (req.body.type)      ? req.body.type    : rows[0].type,
                     mobile  : (req.body.mobile)    ? req.body.mobile  : rows[0].mobile,
+                    title   : (req.body.title)     ? req.body.title   : rows[0].title,
                     email   : (req.body.email)     ? req.body.email   : rows[0].email,
                     address : (req.body.address)   ? req.body.address : rows[0].address,
                     area    : (req.body.state)     ? req.body.area    : rows[0].area,
                     state   : (req.body.state)     ? req.body.state   : rows[0].state,
                     zip     : (req.body.zip)       ? req.body.zip     : rows[0].zip,
+                    salary  : (req.body.salary)    ? req.body.salary  : rows[0].salary,
+                    pf      : (req.body.pf)    ? req.body.pf  : rows[0].pf,
+                    accountname : (req.body.accountname)    ? req.body.accountname  : rows[0].accountname,
+                    account : (req.body.account)    ? req.body.account  : rows[0].account,
+                    bankname : (req.body.bankname)    ? req.body.bankname  : rows[0].bankname,
+                    ifsccode : (req.body.ifsccode)    ? req.body.ifsccode  : rows[0].ifsccode,
+                    cashadvance : (req.body.cashadvance)    ? req.body.cashadvance  : rows[0].cashadvance,
+                    paymentmode : (req.body.paymentmode)    ? req.body.paymentmode  : rows[0].paymentmode,
                 }
                 
                 let sql = "UPDATE employees SET type="+data.type+",\
@@ -69,11 +78,20 @@ router.put(`/amend`, async (req, res) => {
                                                 gender="+ data.gender+ ",\
                                                 dob='"+ data.dob+ "',\
                                                 mobile='"+ data.mobile+ "',\
+                                                title='"+ data.title+ "',\
                                                 email='"+ data.email+ "',\
                                                 address='"+data.address+"', \
                                                 area='"+data.area+"', \
                                                 state='"+data.state+"', \
-                                                zip='"+data.zip+"' \
+                                                zip='"+data.zip+"', \
+                                                salary='"+data.salary+"', \
+                                                pf='"+data.pf+"', \
+                                                accountname='"+data.accountname+"', \
+                                                account='"+data.account+"', \
+                                                bankname='"+data.bankname+"', \
+                                                ifsccode='"+data.ifsccode+"', \
+                                                cashadvance='"+data.cashadvance+"', \
+                                                paymentmode='"+data.paymentmode+"' \
                                                 WHERE ID="+employeeID;
 
                 connection.query(sql, data, (err, results) => {
@@ -110,7 +128,8 @@ router.get(`/all`, async (req, res) => {
   //  if ( jwtvalues.type != 100) { //Admin user only register users
    //     return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
    // }
-    connection.query('select b.*, a.type as typestr FROM employees as b INNER JOIN employeecategory as a ON (b.type = a.ID)', (err, rows) => {
+   const sql='select b.*, a.type as typestr FROM employees as b INNER JOIN employeecategory as a ON (b.type = a.ID) WHERE b.type!=90';
+    connection.query(sql, (err, rows) => {
         if (!err) {
             if ( rows.length>0 )
             { return res.status(200).send( { status: true,
@@ -209,10 +228,74 @@ router.put(`/amendstatus`, async  (req,res) => {
                 return res.status(200).send( {status : true, message: results })
             }
             else
+                return res.status(200).send( { status : false, message: err.sqlMessage })
+        })
+    })
+    
+
+router.post(`/addemployeecategory`, async  (req,res) => {
+//     const BearerToken= req.headers.authorization.split(" ")
+//     const token=BearerToken[1];
+// //    console.log(token)
+//     jwtvalues = jwt.verify(token, secret);
+
+//     if ( jwtvalues.type != 100) { //Admin user only register users
+//         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
+//     }
+
+    let sql = "INSERT INTO employeecategory SET ?";
+
+    let query = connection.query(sql, req.body, (err, results)=> {
+        if ( !err )
+        {
+            console.log(results)
+            return res.status(200).send( { status: true, message: "Employee Category Successfully"} )
+        }
+        else
+        { console.log(err)
+            return res.status(200).send( { status: false, message: err.sqlMessage } );
+        }
+    })
+})
+
+
+router.put(`/amendtype`, async  (req,res) => {
+    //     const BearerToken= req.headers.authorization.split(" ")
+    //     const token=BearerToken[1];
+    // //    console.log(token)
+    //     jwtvalues = jwt.verify(token, secret);
+    
+    //     if ( jwtvalues.type != 100) { //Admin user only register users
+    //         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
+    //     }
+        console.log("bdy"+req.body.ID)
+        let sql = "UPDATE employeecategory SET type='"+req.body.type+
+                                        "',description='"+req.body.description+
+                                        "' WHERE ID='"+req.body.ID +"'"    
+
+        let query = connection.query(sql,(err, results) => {
+            if (!err)
+            {
+                return res.status(200).send( {status : true, message: results })
+            }
+            else
                 return res.status(400).send( { status : false, message: err.sqlMessage })
         })
     })
     
+router.delete(`/deletetype/:id`, async  (req,res) => {
+    console.log("ID delete "+req.params.id)
+    let sql = "DELETE FROM employeecategory WHERE ID='"+req.params.id+"'";
+
+    let query = connection.query(sql,(err, results) => {
+        if (!err)
+        {
+            return res.status(200).send( {status : true, message: "Job Record deleted Successfully" })
+        }
+        else
+            return res.status(200).send( { status : false, message: err.sqlMessage })
+    })
+})
 
 
 module.exports = router;
