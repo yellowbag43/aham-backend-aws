@@ -85,6 +85,31 @@ router.post(`/dailywages`, async  (req,res) => {
   }
 )
 
+
+router.post(`/salary`, async  (req,res) => {
+  console.log(req.body.query)
+         return res.status(200).send( { status: false,
+           message: "NOt available yet"})
+  // const sql=("CALL dailywages_report (?,?,?,?)")
+
+  // connection.query(sql, req.body.query, (err, rows) => {
+  //     if (!err) {
+  //         console.log("fetched "+rows[0].length)
+  //         if ( rows[0].length>0 )
+  //         { 
+  //           create_dailywages(rows[0], req.body.query, res)
+  //         }
+  //         else { return res.status(200).send( { status: false,
+  //                                               message: "No Records Found! Unable to create Report! "})}
+  //     } 
+  //     else {
+  //       return res.status(200).send( { status: false,
+  //         message: err})
+  //     }
+  //   })
+  // 
+})
+
 strDate = (ddate) => {
   return ddate.getFullYear()+'-'+Number(ddate.getMonth()+1)+'-'+ddate.getDate();
 }
