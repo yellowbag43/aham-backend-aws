@@ -9,6 +9,7 @@ const SqlString = require('sqlstring');
 require('dotenv/config')
 
 const secret = process.env.secret;
+const keepidle = process.env.keepidleInterval;
 
 let connection = mysql.createConnection( {
     host: process.env.DB_HOST,
@@ -16,6 +17,15 @@ let connection = mysql.createConnection( {
     password: process.env.DB_PASS,
     database: process.env.DB_NAME
 });
+
+keepDBalive =  () => {
+    connection.ping(err=> {
+        if (err) console.log("Error with db: "+err)
+        else console.log("Db (Attendance) is alive..")
+    })
+}
+
+setInterval(keepDBalive, keepidle); // ping to DB every minute
 
 router.post(`/add`, async  (req,res) => {
     //     const BearerToken= req.headers.authorization.split(" ")

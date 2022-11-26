@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv/config')
 
 const secret = process.env.secret;
+const keepidle = process.env.keepidleInterval;
 
 keepDBalive =  () => {
     connection.ping(err=> {
@@ -16,7 +17,7 @@ keepDBalive =  () => {
     })
 }
 
-setInterval(keepDBalive, 60000); // ping to DB every minute
+setInterval(keepDBalive, keepidle); // ping to DB every minute
 
 
 const check_permission = (auth) => {

@@ -9,6 +9,7 @@ const MyEmail = require('../helpers/myemail')
 require('dotenv/config')
 
 const secret = process.env.secret;
+const keepidle = process.env.keepidleInterval;
 
 let connection = mysql.createConnection( {
     host: process.env.DB_HOST,
@@ -24,7 +25,7 @@ keepDBalive =  () => {
     })
 }
 
-setInterval(keepDBalive, 60000); // ping to DB every minute
+setInterval(keepDBalive, keepidle); // ping to DB every minute
 
 
 router.post(`/reset`, async (req, res) => {

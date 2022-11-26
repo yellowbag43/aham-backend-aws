@@ -8,6 +8,7 @@ const e = require('express');
 require('dotenv/config')
 
 const secret = process.env.secret;
+const keepidle = process.env.keepidleInterval;
 
 let connection = mysql.createConnection( {
     host: process.env.DB_HOST,
@@ -23,7 +24,7 @@ keepDBalive =  () => {
     })
 }
 
-setInterval(keepDBalive, 60000); // ping to DB every minute
+setInterval(keepDBalive, keepidle); // ping to DB every minute
 
 
 router.post(`/add`, async  (req,res) => {
@@ -182,7 +183,7 @@ router.get(`/getcategory`, async (req, res) => {
     //     return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
     // }
 
-    connection.query('SELECT * FROM employeecategory', (err, rows) => {
+    connection.query('SELECT *, type as name FROM employeecategory', (err, rows) => {
         if (!err) {
             if ( rows.length>0 )
             { return res.status(200).send( { status: true,

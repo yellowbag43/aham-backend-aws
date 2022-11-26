@@ -8,6 +8,7 @@ const e = require('express');
 require('dotenv/config')
 
 const secret = process.env.secret;
+const keepidle = process.env.keepidleInterval;
 
 let connection = mysql.createConnection( {
     host: process.env.DB_HOST,
@@ -23,152 +24,98 @@ keepDBalive =  () => {
     })
 }
 
-setInterval(keepDBalive, 60000); // ping to DB every minute
+setInterval(keepDBalive, keepidle); // ping to DB every minute
 
 
 router.post(`/add`, async  (req,res) => {
-//     const BearerToken= req.headers.authorization.split(" ")
-//     const token=BearerToken[1];
-// //    console.log(token)
-//     jwtvalues = jwt.verify(token, secret);
-
-//     if ( jwtvalues.type != 100) { //Admin user only register users
-//         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
-//     }
-    console.log("post add called : "+req.body.jobdate)
-    let sql = "INSERT INTO joblog SET ?";
-
-    let query = connection.query(sql, req.body, (err, results)=> {
-        if ( !err )
-        {
-            return res.status(200).send( { status: true, message: "Job log added"} )
-        }
-        else
-        { console.log(err.sqlMessage)
-            return res.status(200).send( { status: false, message: err.sqlMessage } );
-        }
-    })
-})
-
-
-router.put(`/amend`, async (req, res) => {
-    let employeeID = req.body.ID;
-
-    connection.query('SELECT * FROM employees WHERE ID = ?',[employeeID], (err, rows) => {
-        if (!err) {
-            if ( rows.length>0){
-                       
-                const data = {
-                    type    : (req.body.type)      ? req.body.type    : rows[0].type,
-                    dob     : (req.body.dob)       ? req.body.dob     : rows[0].dob,
-                    mobile  : (req.body.mobile)    ? req.body.mobile  : rows[0].mobile,
-                    address : (req.body.email)     ? req.body.address : rows[0].address,
-                    area    : (req.body.state)     ? req.body.area    : rows[0].area,
-                    state   : (req.body.state)     ? req.body.state   : rows[0].state,
-                }
-                
-                let sql = "UPDATE employees SET type="+data.type+",\
-                                                dob='"+data.dob+"', \
-                                                mobile='"+ data.mobile+ "',\
-                                                address='"+data.address+"' \
-                                                WHERE ID='"+employeeID +"'";
-
-                connection.query(sql, data, (err, results) => {
-                    if ( err ){
-                        console.log(err);
-                        return res.status(400).send( { status: false,
-                        message: err.sqlMessage});      
-                    }
-                    else
-                    {
-                        return res.status(200).send({status: 'Employee proflie updated Successfully!',
-                        message: results})    
-                    } 
-                })
-            }
-            else{
-                return res.status(400).send( {  success: false, message:'INVALID Employee! Cannot Update Employee'} );
-            }
-        } 
-        else 
-        {
-            return res.status(400).send( {  success: false, message:'ERROR! Cannot Update Employee'} );
-        }
-    });
-})
-
-
-router.post(`/query`, async  (req,res) => {
     //     const BearerToken= req.headers.authorization.split(" ")
-//     const token=BearerToken[1];
-// //    console.log(token)
-//     jwtvalues = jwt.verify(token, secret);
+    //     const token=BearerToken[1];
+    // //    console.log(token)
+    //     jwtvalues = jwt.verify(token, secret);
+    
+    //     if ( jwtvalues.type != 100) { //Admin user only register users
+    //         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
+    //     }
 
-//     if ( jwtvalues.type != 100) { //Admin user only register users
-//         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
-//     }
+    console.log(req.body)
+    let sql = "INSERT INTO transactions SET ?";
+    
+        let query = connection.query(sql, req.body, (err, results)=> {
+            if ( !err )
+            {
+                const data=[req.body.txntype, req.body.employee, req.body.amount]
+                const sql=('CALL UPDATE_EMPLOYEE_CASH(?,?,?)')
+                console.log(data)
+                let query = connection.query(sql, data, (err, results)=> {
+                    if (!err)
+                    return res.status(200).send( { status: true, message: "Transaction added, employee table updated"} )
+                    else
+                    return res.status(200).send ({ status: false, message: "Contact ADMIN! Unable to update EMployee table"});})
+            }
+            else
+            { console.log(err.sqlMessage)
+                return res.status(200).send( { status: false, message: err.sqlMessage } );
+            }
+        })
+    })
 
-    const sql=("CALL fetch_job_log (?)")
+    
+router.get(`/id/:id`, async (req, res) => {
+    const sql="CALL query_transaction_by_employee(?)";
 
-
-    connection.query(sql, req.body.jobdate, (err, rows) => {
-        if (!err) {
-            if ( rows.length>0 )
-            { 
-                return res.status(200).send( { status: true,
-                                             joblog: rows[0]})}
-            else { return res.status(200).send( { status: false,
-                                                  message: "no Joblog added yet!"})}
-        } 
-        else {
-            return res.status(200).send( {  success: false, message:'Failed to fetch jobs completed!'} );
-        }});
-})
-
-router.get(`/category`, async (req, res) => {
-    // const BearerToken= req.headers.authorization.split(" ")
-    // const token=BearerToken[1];
-    // jwtvalues = jwt.verify(token, secret);
-
-    // if ( jwtvalues.type != 100) { //Admin user only register users
-    //     return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
-    // }
-
-    connection.query('SELECT * FROM employeecategory', (err, rows) => {
+    connection.query(sql, req.params.id, (err, rows) => {
         if (!err) {
             if ( rows.length>0 )
             { return res.status(200).send( { status: true,
-                                             employees: rows})}
-            else { return res.status(200).send( { status: true,
-                                                  message: "no Employees added yet!"})}
+                                             transactions: rows[0]})}
+            else { return res.status(200).send( { status: false,
+                                                  message: "no transaction added yet!"})}
         } 
         else {
-            return res.status(400).send( {  success: false, message:'Failed to fetch employees!'} );
+            return res.status(400).send( {  success: false, message:'Failed to fetch transactions!'} );
+        }});
+})
+
+router.get(`/types`, async (req, res) => {
+
+    connection.query('SELECT * FROM transactiontypes', (err, rows) => {
+        if (!err) {
+            if ( rows.length>0 )
+            { return res.status(200).send( { status: true,
+                                             txntypes: rows})}
+            else { return res.status(200).send( { status: true,
+                                                  message: "no transaction types added yet!"})}
+        } 
+        else {
+            return res.status(400).send( {  success: false, message:'Failed to fetch transaction types!'} );
         }});
 })
 
 
-router.delete(`/delete`, async  (req,res) => {
-    const BearerToken= req.headers.authorization.split(" ")
-    const token=BearerToken[1];
-//    console.log(token)
-    jwtvalues = jwt.verify(token, secret);
 
-    if ( jwtvalues.type != 100) { //Admin user only register users
-        return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
-    }
-    
-    let sql = "DELETE FROM employees WHERE ID='"+req.body.ID+"'";
+router.put(`/amend`, async (req, res) => 
+{
+    console.log(req.body.query)
+    const sql = ('call update_transaction_state(?,?)');
 
-    let query = connection.query(sql,(err, results) => {
-        if (!err)
-        {
-            return res.status(200).send( {status : results })
+    connection.query(sql, req.body.query, (err, results) => {
+        if ( err ){
+            console.log(err);
+            return res.status(200).send( { status: false,
+            message: err.sqlMessage});      
         }
         else
-            return res.status(400).send( { status : err.sqlMessage })
+        {
+            if (results.affectedRows > 0)
+            return res.status(200).send({status: true, message :'Transaction State Reconciled'})    
+            else
+            return res.status(200).send({status: true, message :'Transaction NOT FOUND'})    
+        } 
     })
+
 })
+
+
 
 
 
