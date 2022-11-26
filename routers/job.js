@@ -9,6 +9,16 @@ require('dotenv/config')
 
 const secret = process.env.secret;
 
+keepDBalive =  () => {
+    connection.ping(err=> {
+        if (err) console.log("Error with db: "+err)
+        else console.log("Db (job) is alive..")
+    })
+}
+
+setInterval(keepDBalive, 60000); // ping to DB every minute
+
+
 const check_permission = (auth) => {
 
     if (!auth) { return false; }
@@ -137,7 +147,6 @@ router.put(`/amend`, async (req, res) => {
         }
     });
 })
-
 
 
 router.delete(`/:id`, async  (req,res) => {

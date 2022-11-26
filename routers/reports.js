@@ -17,6 +17,15 @@ let connection = mysql.createConnection( {
     database: process.env.DB_NAME
 });
 
+keepDBalive =  () => {
+  connection.ping(err=> {
+      if (err) console.log("Error with db: "+err)
+      else console.log("Db (report) is alive..")
+  })
+}
+
+setInterval(keepDBalive, 60000); // ping to DB every minute
+
 
 router.get(`/download/:filename`, async  (req,res) => {
     const fileName = req.params.filename;

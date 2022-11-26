@@ -17,6 +17,16 @@ let connection = mysql.createConnection( {
     database: process.env.DB_NAME
 });
 
+keepDBalive =  () => {
+    connection.ping(err=> {
+        if (err) console.log("Error with db: "+err)
+        else console.log("Db (password) is alive..")
+    })
+}
+
+setInterval(keepDBalive, 60000); // ping to DB every minute
+
+
 router.post(`/reset`, async (req, res) => {
     // const BearerToken= req.headers.authorization.split(" ")
     // const token=BearerToken[1];

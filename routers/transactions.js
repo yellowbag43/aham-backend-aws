@@ -19,7 +19,7 @@ let connection = mysql.createConnection( {
 keepDBalive =  () => {
     connection.ping(err=> {
         if (err) console.log("Error with db: "+err)
-        else console.log("Db (joblog) is alive..")
+        else console.log("Db (transaction) is alive..")
     })
 }
 
