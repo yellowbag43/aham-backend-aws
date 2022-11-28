@@ -3,8 +3,8 @@ const router = express.Router();
 const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const lib = require('../lib/jobwise');
-require('../lib/dailywages');
+const lib = require('../reports/jobwise');
+require('../reports/salarywithoutPF');
 
 require('dotenv/config')
 
@@ -87,27 +87,31 @@ router.post(`/dailywages`, async  (req,res) => {
 
 
 router.post(`/salary`, async  (req,res) => {
+  
   console.log(req.body.query)
-         return res.status(200).send( { status: false,
-           message: "NOt available yet"})
-  // const sql=("CALL dailywages_report (?,?,?,?)")
+  const ddate = new Date(req.body.query[0])
 
-  // connection.query(sql, req.body.query, (err, rows) => {
-  //     if (!err) {
-  //         console.log("fetched "+rows[0].length)
-  //         if ( rows[0].length>0 )
-  //         { 
-  //           create_dailywages(rows[0], req.body.query, res)
-  //         }
-  //         else { return res.status(200).send( { status: false,
-  //                                               message: "No Records Found! Unable to create Report! "})}
-  //     } 
-  //     else {
-  //       return res.status(200).send( { status: false,
-  //         message: err})
-  //     }
-  //   })
-  // 
+  const sql=("CALL salary_report (?,?,?,?,?)")
+
+  connection.query(sql, req.body.query, (err, rows) => {
+     if (!err) {
+          if ( rows[0].length>0 )
+           { 
+             console.log("Got Data for report")
+             create_salary_report(ddate, rows[0], req.body.query, res);
+             console.log("Got Data for report DONE")
+              //           create_dailywages(rows[0], req.body.query, res)
+           }
+           else 
+           { 
+            return res.status(200).send( { status: true, mesasge: 'DATA not available', downloadfile: "DATA not available"})
+          }
+       } 
+       else {
+         return res.status(200).send( { status: false,
+           message: err})
+       }
+     })
 })
 
 strDate = (ddate) => {

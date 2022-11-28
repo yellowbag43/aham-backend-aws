@@ -44,7 +44,7 @@ router.post(`/add`, async  (req,res) => {
             if ( !err )
             {
                 const data=[req.body.txntype, req.body.employee, req.body.amount]
-                const sql=('CALL UPDATE_EMPLOYEE_CASH(?,?,?)')
+                const sql=('CALL UPDATE_EMPLOYEE_CASH_TABLE(?,?,?)')
                 console.log(data)
                 let query = connection.query(sql, data, (err, results)=> {
                     if (!err)
@@ -93,12 +93,13 @@ router.get(`/types`, async (req, res) => {
 
 
 
-router.put(`/amend`, async (req, res) => 
+router.put(`/reconcile`, async (req, res) => 
 {
     console.log(req.body.query)
-    const sql = ('call update_transaction_state(?,?)');
+    const data=[req.body.query[0], req.body.query[1], req.body.query[2]*-1]
+    const sql = ('call UPDATE_EMPLOYEE_CASH_TABLE(?,?,?)');
 
-    connection.query(sql, req.body.query, (err, results) => {
+    connection.query(sql, data, (err, results) => {
         if ( err ){
             console.log(err);
             return res.status(200).send( { status: false,
@@ -106,10 +107,20 @@ router.put(`/amend`, async (req, res) =>
         }
         else
         {
-            if (results.affectedRows > 0)
-            return res.status(200).send({status: true, message :'Transaction State Reconciled'})    
+            if (results.affectedRows > 0){
+                const data2=[req.body.query[3], 0]
+                console.log("update transaction state")
+                console.log(data2)
+                const sql2=('CALL update_transaction_state(?,?)')
+                connection.query(sql2, data2, (err, results) => {
+                    if (!err)
+                        return res.status(200).send({status: true, message :'Transaction State Reconciled'})    
+                    else
+                        return res.status(200).send({status: false, message :'Unable to update STATE, CONTACT ADMIN'})    
+                } )    
+            }
             else
-            return res.status(200).send({status: true, message :'Transaction NOT FOUND'})    
+            return res.status(200).send({status: true, message :'Unable to update STATE, CONTACT ADMIN'})    
         } 
     })
 

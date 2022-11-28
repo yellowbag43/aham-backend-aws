@@ -100,6 +100,6 @@ module.export = create_dailywages = ( async (attendancedata, query, res) =>{
   
     return res.status(200).send( { status: true,
       downloadfile: fileName})
-  
+
   })
   
