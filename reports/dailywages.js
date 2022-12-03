@@ -14,7 +14,7 @@ module.export = create_dailywages = ( async (attendancedata, query, res) =>{
             fontWeight: 'bold',
         },
         {
-        value: 'Daily Wages Staff Monthly Salary - '+start_date.toLocaleString('default', { month: 'long'})+' '+start_date.getFullYear,
+        value: 'Daily Wages Staff Monthly Salary - '+start_date.toLocaleString('default', { month: 'long'})+' '+start_date.getFullYear(),
         fontWeight: 'bold',
       }
     ]

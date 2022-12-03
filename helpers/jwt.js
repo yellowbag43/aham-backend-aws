@@ -8,15 +8,16 @@ function authJwt() {
         algorithms: ['HS256']
     }).unless({
         path: [
-            { url: /\/loan-api\/v1\/ledger(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
-            { url: /\/mk-api\/v1\/job(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
-            { url: /\/mk-api\/v1\/attendance(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
-            { url: /\/mk-api\/v1\/user(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
-            { url: /\/mk-api\/v1\/employee(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
-            { url: /\/mk-api\/v1\/password(.*)/, methods: ['GET', 'POST','PUT', 'DELETE', 'OPTIONS']},//working
-            { url: /\/mk-api\/v1\/employee(.*)/, methods: ['GET',  'DELETE', 'OPTIONS']},//working
-            { url: /\/mk-api\/v1\/reports(.*)/, methods: ['GET', 'POST', 'DELETE', 'OPTIONS']},//working
-            { url: /\/mk-api\/v1\/transactions(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
+             { url: /\/mk-api\/v1\/authentication(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
+            // { url: /\/mk-api\/v1\/job(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
+            // { url: /\/mk-api\/v1\/attendance(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
+            // { url: /\/mk-api\/v1\/user(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
+            // { url: /\/mk-api\/v1\/employee(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
+               { url: /\/mk-api\/v1\/password(.*)/, methods: ['GET', 'POST','PUT', 'DELETE', 'OPTIONS']},//working
+            // { url: /\/mk-api\/v1\/employee(.*)/, methods: ['GET',  'DELETE', 'OPTIONS']},//working
+            // { url: /\/mk-api\/v1\/reports(.*)/, methods: ['GET', 'POST', 'DELETE', 'OPTIONS']},//working
+            // { url: /\/mk-api\/v1\/transactions(.*)/, methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']},//working
+            // { url: /(.*)/ } //Allow every URL
         ]                                                               //regex101.com
     })
 }

@@ -42,18 +42,13 @@ router.post(`/reset`, async (req, res) => {
         connection.query('SELECT email,mobile FROM users WHERE login = ?',[login], (err, rows) => {
                 if (!err) {
                     if ( rows.length <= 0 )
-                        return res.status(400).send( {status : 'UNKNOWN Login' })
+                        return res.status(400).send( {status : false, message: 'UNKNOWN Login' })
 
-//                    console.log('Email  ' + rows[0].email)
-  //                  console.log('Mobile ' + rows[0].mobile)
-    //                if ( rows[0].email != req.body.email)
-    //                  return res.status(400).send( {status : 'Registered Email is Incorrect!'})
                     const OTP = Math.floor(Math.random() * 9999);
                     const now = new Date();
                     const now10 = date.addMinutes(now, 10)
                     const options =  {
                         from: "resetconfigs@outlook.com",
-//                        to: "muthupillai@gmail.com",
                         to: rows[0].email,
                         subject: "Password Reset Link",
                         text: OTP + " is your Check Value for password RESET ",
@@ -70,8 +65,9 @@ router.post(`/reset`, async (req, res) => {
                     connection.query(sql, (err, results) => {
                         if ( !err ) console.log("OTP update in user table")
                     })
-                    return res.status(200).send( {status : 'Email/SMS sent to reset Password' })
-                } 
+                    return res.status(200).send( {status : true, message: 'OTP Sent to '+rows[0].email })
+                } else 
+                return res.status(200).send( {status : false, message: 'ERROR: contact ADMIN' })
         });
     }
     catch(error)
@@ -99,17 +95,17 @@ router.put(`/change`, async (req, res) => {
         connection.query('SELECT otp, otpvalidity, email FROM users WHERE login = ?',[login], (err, rows) => {
             if (!err) {
                 if ( rows.length <= 0 )
-                    return res.status(400).send( {status : 'UNKNOWN Login' })
+                    return res.status(200).send( {status : true, message:  'UNKNOWN Login' })
                 if ( req.body.otp!="ADMIN")
                 {
                     if ( req.body.otp != rows[0].otp)
-                        return res.status(200).send( {status : 'Wrong OTP attempted! Try again!' })
+                        return res.status(200).send( {status : false, message: 'Wrong OTP attempted! Try again!' })
 
                     const datethen = new Date(rows[0].otpvalidity)
                     const datenow  = new Date();
                     if ( datenow > datethen ) {  console.log("OTP EXPIRED. Try again later");
                     return res.status(200).send( 
-                        {status : 'OTP Expired! Try again!',
+                        {status : false, message: 'OTP Expired! Try again!',
                         timeotp : rows[0].otpvalidity,
                         timenow  : datenow                })
                     }

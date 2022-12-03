@@ -5,7 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const lib = require('../reports/jobwise');
 require('../reports/salarywithoutPF');
-
+require('../reports/dailywages')
+require('../reports/directjobsalary')
 require('dotenv/config')
 
 const secret = process.env.secret;
@@ -41,7 +42,7 @@ router.get(`/download/:filename`, async  (req,res) => {
     })
 })
 
-router.post(`/excelschema`, async  (req,res) => {
+router.post(`/jobwise`, async  (req,res) => {
   console.log(req.body.query)
   const sql=("CALL fetch_joblog_dates (?,?,?)")
 
@@ -85,22 +86,45 @@ router.post(`/dailywages`, async  (req,res) => {
   }
 )
 
+router.post(`/directsalarycash`, async  (req,res) => {
+  console.log(req.body.query)
+  const sql=("CALL directjob_salary_cash (?,?,?,?,?)")
+
+  connection.query(sql, req.body.query, (err, rows) => {
+      if (!err) {
+          console.log("fetched "+rows[0].length)
+          if ( rows[0].length>0 )
+          { 
+            create_dailywages(rows[0], req.body.query, res)
+          }
+          else { return res.status(200).send( { status: false,
+                                                message: "No Records Found! Unable to create Report! "})}
+      } 
+      else {
+        return res.status(200).send( { status: false,
+          message: err})
+      }
+    })
+  }
+)
 
 router.post(`/salary`, async  (req,res) => {
   
   console.log(req.body.query)
   const ddate = new Date(req.body.query[0])
 
-  const sql=("CALL salary_report (?,?,?,?,?)")
+  let sql=("CALL salary_report (?,?,?,?,?)")
+  if ( req.body.query[2] === 91 )
+   sql = 'CALL directjob_salary_cash (?,?,?,?,?)'
 
   connection.query(sql, req.body.query, (err, rows) => {
-     if (!err) {
+     if (!err) { console.log("SQL success "+rows.length)
           if ( rows[0].length>0 )
            { 
-             console.log("Got Data for report")
-             create_salary_report(ddate, rows[0], req.body.query, res);
-             console.log("Got Data for report DONE")
-              //           create_dailywages(rows[0], req.body.query, res)
+              if ( req.body.query[2]===91)
+                direct_job_salary(ddate, rows[0], req.body.query, res)
+              else
+                create_salary_report(ddate, rows[0], req.body.query, res);
            }
            else 
            { 
@@ -108,6 +132,7 @@ router.post(`/salary`, async  (req,res) => {
           }
        } 
        else {
+        console.log(err)
          return res.status(200).send( { status: false,
            message: err})
        }

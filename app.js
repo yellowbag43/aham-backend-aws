@@ -29,6 +29,7 @@ const joblogRouter = require('./routers/joblog')
 const attendanceRouter = require('./routers/attendance')
 const excelRouter = require('./routers/reports')
 const trasnactionRouter = require('./routers/transactions')
+const authenticationRouter = require('./routers/authentication')
 
 const app = express();
 const errorhandler = require('./helpers/error-handler')
@@ -44,6 +45,7 @@ app.use(authJwt());
 app.use(errorhandler);
 
 app.use(`${api}/user`, userRouter)
+app.use(`${api}/authentication`, authenticationRouter)
 app.use(`${api}/password`, passwordRouter)
 app.use(`${api}/job`, jobRouter)
 app.use(`${api}/employee`, employeeRouter)
@@ -51,6 +53,7 @@ app.use(`${api}/joblog`, joblogRouter)
 app.use(`${api}/attendance`, attendanceRouter)
 app.use(`${api}/reports`, excelRouter)
 app.use(`${api}/transactions`, trasnactionRouter)
+
 app.get('/', (req, res)  => {
     res.send("hello mk api!");
 })

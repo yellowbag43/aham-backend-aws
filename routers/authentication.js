@@ -26,56 +26,70 @@ keepDBalive =  () => {
 setInterval(keepDBalive, 60000); // ping to DB every minute
 
 
-router.post(`/add`, async  (req,res) => {
-    //     const BearerToken= req.headers.authorization.split(" ")
-    //     const token=BearerToken[1];
-    // //    console.log(token)
-    //     jwtvalues = jwt.verify(token, secret);
-    
-    //     if ( jwtvalues.type != 100) { //Admin user only register users
-    //         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
-    //     }
-    
-        let sql = "INSERT INTO users SET ?";
-    
-        let query = connection.query(sql, req.body, (err, results)=> {
-            if ( !err )
-            {
-                console.log(results)
-                return res.status(200).send( { status: true, message: "User Added Successfully"} )
-            }
-            else
-            { console.log(err)
-                return res.status(200).send( { status: false, message: err.sqlMessage } );
-            }
-        })
-    })
+router.post(`/register`, async  (req,res) => {
+//    const BearerToken= req.headers.authorization.split(" ")
+  //  const token=BearerToken[1];
+//    console.log(token)
+   // jwtvalues = jwt.verify(token, secret);
 
-router.post(`/addcategory`, async  (req,res) => {
-    //     const BearerToken= req.headers.authorization.split(" ")
-    //     const token=BearerToken[1];
-    // //    console.log(token)
-    //     jwtvalues = jwt.verify(token, secret);
-    
-    //     if ( jwtvalues.type != 100) { //Admin user only register users
-    //         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
-    //     }
-    
-        let sql = "INSERT INTO usercategory SET ?";
-    
-        let query = connection.query(sql, req.body, (err, results)=> {
-            if ( !err )
-            {
-                console.log(results)
-                return res.status(200).send( { status: true, message: "User Category Added Successfully"} )
-            }
-            else
-            { console.log(err)
-                return res.status(200).send( { status: false, message: err.sqlMessage } );
-            }
-        })
+   // if ( jwtvalues.type != 100) { //Admin user only register users
+   //     return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
+   // }
+    const passwordHash = bcrypt.hashSync(req.body.password,10)
+
+    req.body.password = passwordHash;
+
+//    console.log(req.body)
+
+    let sql = "INSERT INTO users SET ?";
+
+    let query = connection.query(sql, req.body, (err, results)=> {
+        if ( !err )
+        {
+            console.log(results)
+            return res.status(200).send( { status: true, message: "New User added!"} )
+        }
+        else
+        { console.log(err);
+            return res.status(200).send( { status: false, message: err.sqlMessage } );
+        }
     })
-    
+})
+
+
+router.post(`/login`, async (req, res) => {
+    let userID = req.body.login.toLowerCase();
+
+    connection.query('SELECT login,password,user_type FROM users WHERE login = ?',[userID], (err, rows) => {
+        if (!err) {
+            if (rows.length>0) {
+            console.log("user exists")
+            if (bcrypt.compareSync(req.body.password, rows[0].password)) {
+                const JWTtoken = jwt.sign(
+                    {
+                        userId : userID,
+                        type   : rows[0].user_type
+                    },
+                    secret,   //secret key
+                    {
+                        expiresIn : "1h"
+                    }
+                )
+                console.log("user authentication success")
+
+                return res.status(200).send( { status: true, message: "Login Authentication", key: JWTtoken} );
+            }
+            else {                console.log("user authentication Failed, Failed Failed")
+                return res.status(200).send( {  status: false, message:'Authentication Failed   '} );
+            };            
+            }
+            else {
+                return res.status(200).send( {  success: false, message:'Invalid User'} );
+            } 
+        }});
+})
+
+
 router.put(`/amend`, async (req, res) => {
     console.log("BODY "+req.body.state)
     connection.query('SELECT user_type,email,mobile,address,area,state,zip FROM users WHERE ID = ?',[req.body.ID], (err, rows) => {
@@ -177,7 +191,7 @@ router.get(`/getcategory`, async (req, res) => {
         if (!err) {
             if ( rows.length>0 )
             { return res.status(200).send( { status: true,
-                                             categories: rows})}
+                                             users: rows})}
             else { return res.status(200).send( { status: true,
                                                   message: "no Users added yet!"})}
         } 
@@ -186,45 +200,28 @@ router.get(`/getcategory`, async (req, res) => {
         }});
 })
 
+router.delete(`/delete`, async  (req,res) => {
+//     const BearerToken= req.headers.authorization.split(" ")
+//     const token=BearerToken[1];
+// //    console.log(token)
+//     jwtvalues = jwt.verify(token, secret);
 
-router.put(`/amendcategory`, async (req, res) => {
+//     if ( jwtvalues.type != 100) { //Admin user only register users
+//         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
+//     }
+    
+    let sql = "DELETE FROM users WHERE login='"+req.body.login+"'";
 
-    connection.query('SELECT * FROM users WHERE ID = ?',[req.body.ID], (err, rows) => {
-        if (!err) {
-            if ( rows.length>0){
-                        
-                const data = {
-                    category    : (req.body.category)    ? req.body.category   : rows[0].category,
-                    description : (req.body.description) ? req.body.description: rows[0].description,
-                }
-                
-                let sql = "UPDATE usercategory SET category="+data.category+",\
-                                            description='"+ data.description+ ",\
-                                            WHERE ID="+req.body.ID ;
-
-                connection.query(sql, data, (err, results) => {
-                    if ( err ){
-                        return res.status(200).send( { status: false,
-                        message: err.sqlMessage});      
-                    }
-                    else
-                    {
-                        return res.status(200).send({status: true, message : 'User proflie updated Successfully!'})    
-                    } 
-                })
-            }
-            else{
-                return res.status(200).send( {  success: false, message:'INVALID USER! Cannot Update User'} );
-            }
-        } 
-        else 
+    let query = connection.query(sql,(err, results) => {
+        if (!err)
         {
-            return res.status(400).send( {  success: false, message:'ERROR! Cannot Update User'} );
+            return res.status(200).send( {status : results })
         }
-    });
+        else
+            return res.status(400).send( { status : err.sqlMessage })
+    })
 })
-    
-    
+
 router.delete(`/:id`, async  (req,res) => {
     //     const BearerToken= req.headers.authorization.split(" ")
     //     const token=BearerToken[1];
@@ -248,32 +245,5 @@ router.delete(`/:id`, async  (req,res) => {
     })
     
 
-router.delete(`/category/:id`, async  (req,res) => {
-//     const BearerToken= req.headers.authorization.split(" ")
-//     const token=BearerToken[1];
-// //    console.log(token)
-//     jwtvalues = jwt.verify(token, secret);
 
-//     if ( jwtvalues.type != 100) { //Admin user only register users
-//         return res.status(200).send( { status: 'Access Denied for non-Admin Users' } );
-//     }
-    
-    let sql = "DELETE FROM usercategory WHERE ID='"+req.params.id+"'";
-
-    let query = connection.query(sql,(err, results) => {
-        if (!err)
-        {
-            if (results.affectedRows >0) 
-            return res.status(200).send( {status : true, message: "category deleted" })
-            else
-            return res.status(200).send( {status : false, message: "ERROR  in category deletion Attempt" })
-
-        }
-        else
-            return res.status(200).send( { status : false, message: err.sqlMessage })
-    })
-})
-
-
-    
 module.exports = router;
